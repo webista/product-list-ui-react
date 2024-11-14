@@ -25,31 +25,26 @@ function App() {
   const [error, setError] = useState(false);
   const errorText = "We're sorry. Products could not be loaded.";
 
-  function fetchData(url) {
+  async function fetchData(url) {
     setIsLoading(true);
     setError(false);
     setProductData([]);
 
-    const checkError = (response) => {
-      if (response.status >= 200 && response.status <= 299) {
-        return response.json();
-      } else {
-        throw Error(response.status);
-      }
-    };
+    try {
+      const response = await fetch(url);
 
-    const handleError = (error) => {
+      if (!response.ok) {
+        throw new Error(`Response status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      setIsLoading(false);
+      setProductData(data);
+    } catch {
       console.warn(error.message);
       setIsLoading(false);
       setError(true);
-    };
-
-    const handleData = (data) => {
-      setIsLoading(false);
-      setProductData(data);
-    };
-
-    fetch(url).then(checkError).then(handleData).catch(handleError);
+    }
   }
 
   function handleClick(tabID, productsURL) {
